@@ -1,0 +1,23 @@
+{
+  "name": "web-link-shortener",
+  "version": "1.0.0",
+  "description": "Url shortener",
+  "author": "Rambox",
+  "license": "unlicensed",
+  "private": true,
+  "scripts": {
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html"
+  },
+  "devDependencies": {
+    "@parcel/validator-typescript": "^2.6.2",
+    "parcel": "^2.6.2"
+  },
+  "dependencies": {
+    "preact": "^10.9.0",
+    "preact-router": "^4.0.1"
+  },
+  "alias": {
+    "preact/jsx-dev-runtime": "preact/jsx-runtime"
+  }
+}
