@@ -1,1 +1,2 @@
 CREATE TABLE users (id SERIAL PRIMARY KEY, user_id VARCHAR(32), username VARCHAR(48), password VARCHAR(256))
+CREATE TABLE links (id SERIAL PRIMARY KEY, owner_id VARCHAR(32), link_id VARCHAR(16), private BOOLEAN, disabled BOOLEAN, destination VARCHAR, source VARCHAR(128), created TIMESTAMP WITH TIME ZONE, modified TIMESTAMP WITH TIME ZONE)
