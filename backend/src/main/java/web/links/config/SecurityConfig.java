@@ -2,6 +2,7 @@ package web.links.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -15,7 +16,10 @@ import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
+import org.springframework.security.web.server.authentication.logout.DelegatingServerLogoutHandler;
 import org.springframework.security.web.server.authentication.logout.HttpStatusReturningServerLogoutSuccessHandler;
+import org.springframework.security.web.server.authentication.logout.SecurityContextServerLogoutHandler;
+import org.springframework.security.web.server.authentication.logout.WebSessionServerLogoutHandler;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
@@ -28,6 +32,7 @@ import web.links.utils.PasswordUtils;
 import java.util.Map;
 
 @EnableWebFluxSecurity
+@Configuration
 public class SecurityConfig {
 
     @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -44,6 +49,7 @@ public class SecurityConfig {
                     .and()
                 .addFilterAt(apiLoginFilter(repository), SecurityWebFiltersOrder.AUTHENTICATION)
                 .logout()
+                    .logoutHandler(new DelegatingServerLogoutHandler(new WebSessionServerLogoutHandler(), new SecurityContextServerLogoutHandler()))
                     .logoutSuccessHandler(new HttpStatusReturningServerLogoutSuccessHandler())
                     .logoutUrl("/api/v1/users/logout")
                     .and()
