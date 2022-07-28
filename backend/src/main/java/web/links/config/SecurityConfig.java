@@ -12,8 +12,6 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.authentication.logout.DelegatingServerLogoutHandler;
@@ -27,9 +25,6 @@ import org.springframework.web.server.WebFilter;
 import web.links.auth.ApiRequestServerAuthenticationConverter;
 import web.links.auth.ResponseProducingAuthenticationFailureHandler;
 import web.links.auth.HttpStatusReturningAuthenticationSuccessHandler;
-import web.links.utils.PasswordUtils;
-
-import java.util.Map;
 
 @EnableWebFluxSecurity
 @Configuration
@@ -68,21 +63,6 @@ public class SecurityConfig {
                     .anyExchange().permitAll()
                     .and()
                 .build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        final String defaultId = "argon2";
-        final PasswordEncoder defaultEncoder = PasswordUtils.argon2Encoder();
-        final Map<String, PasswordEncoder> encoders = Map.of(
-                defaultId, defaultEncoder,
-                "bcrypt", PasswordUtils.bcryptEncoder()
-        );
-
-        final DelegatingPasswordEncoder encoder = new DelegatingPasswordEncoder(defaultId, encoders);
-        encoder.setDefaultPasswordEncoderForMatches(defaultEncoder);
-
-        return encoder;
     }
 
     @Autowired
