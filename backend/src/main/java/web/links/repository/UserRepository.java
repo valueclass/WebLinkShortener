@@ -11,4 +11,7 @@ import web.links.model.UserModel;
 public interface UserRepository extends R2dbcRepository<UserModel, Integer> {
     @Query("SELECT * FROM users WHERE username = :username")
     Mono<UserModel> findByUsername(String username);
+
+    @Query("SELECT * FROM users WHERE userId = :userId")
+    Mono<UserModel> findByUserId(String userId);
 }

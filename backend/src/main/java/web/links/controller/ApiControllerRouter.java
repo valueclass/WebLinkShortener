@@ -7,18 +7,20 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import web.links.controller.v1.LinkController;
+import web.links.controller.v1.UserController;
 
 @Component
 public class ApiControllerRouter {
 
     @Bean
-    public RouterFunction<ServerResponse> routeV1(LinkController links) {
+    public RouterFunction<ServerResponse> routeV1(final LinkController links, final UserController users) {
         RouterFunction<ServerResponse> apiRouter = RouterFunctions.route()
                 .GET("/links", links::allLinks)
                 .GET("/links/{id}", links::findLink)
                 .POST("/links", links::createLink)
                 .DELETE("/links/{id}", links::deleteLink)
                 .PATCH("/links/{id}", links::updateLink)
+                .POST("/users/password", users::updatePassword)
                 .build();
 
         return RouterFunctions.nest(RequestPredicates.path("/api/v1"), apiRouter);

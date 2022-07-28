@@ -1,5 +1,10 @@
 package web.links.utils;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import reactor.core.publisher.Mono;
+import web.links.auth.ExtendedUserDetails;
+
 import java.util.Random;
 
 public class Utils {
@@ -19,4 +24,13 @@ public class Utils {
         return new String(chars);
     }
 
+    public static Mono<String> username(final ServerRequest request) {
+        return request.principal().flatMap(p -> {
+            if (p instanceof Authentication auth && auth.getPrincipal() instanceof ExtendedUserDetails details) {
+                return Mono.just(details.getUserId());
+            }
+
+            return Mono.empty();
+        });
+    }
 }
