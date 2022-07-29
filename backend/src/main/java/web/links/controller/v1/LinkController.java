@@ -6,7 +6,9 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 import web.links.dto.LinkDto;
+import web.links.dto.ModifyLinkDto;
 import web.links.service.LinkService;
+import web.links.utils.Utils;
 
 import java.net.URI;
 
@@ -24,7 +26,10 @@ public class LinkController {
     }
 
     public Mono<ServerResponse> createLink(final ServerRequest request) {
-        return ServerResponse.created(URI.create("http://exmaple.com/")).build();
+        return Utils.userId(request)
+                .zipWith(request.bodyToMono(ModifyLinkDto.class))
+                .flatMap(tuple -> service.createLink(tuple.getT1(), tuple.getT2()))
+                .flatMap(link -> ServerResponse.created(URI.create("/api/v1/links/" + link.getId())).bodyValue(link));
     }
 
     public Mono<ServerResponse> deleteLink(final ServerRequest request) {

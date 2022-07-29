@@ -16,7 +16,7 @@ public class UserController {
     private UserService users;
 
     public Mono<ServerResponse> updatePassword(final ServerRequest request) {
-        return Utils.username(request).zipWith(request.bodyToMono(PasswordsDto.class))
+        return Utils.userId(request).zipWith(request.bodyToMono(PasswordsDto.class))
                 .flatMap(pair -> users.updatePassword(pair.getT1(), pair.getT2()))
                 .then(request.session())
                 .flatMap(WebSession::invalidate)
