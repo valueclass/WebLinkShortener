@@ -8,4 +8,5 @@ import web.links.dto.ModifyLinkDto;
 public interface LinkService {
     Flux<LinkDto> allLinks();
     Mono<LinkDto> createLink(String userId, ModifyLinkDto metadata);
+    Mono<LinkDto> modifyLink(String userId, String linkId, ModifyLinkDto metadata);
 }

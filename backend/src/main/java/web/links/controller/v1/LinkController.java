@@ -37,6 +37,8 @@ public class LinkController {
     }
 
     public Mono<ServerResponse> updateLink(final ServerRequest request) {
-        return ServerResponse.ok().build();
+        return Mono.zip(Utils.userId(request), Mono.just(request.pathVariable("id")), request.bodyToMono(ModifyLinkDto.class))
+                .flatMap(tuple -> service.modifyLink(tuple.getT1(), tuple.getT2(), tuple.getT3()))
+                .flatMap(link -> ServerResponse.ok().bodyValue(link));
     }
 }

@@ -5,6 +5,10 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 import web.links.auth.ExtendedUserDetails;
 
+import java.time.Clock;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Random;
 
 public class Utils {
@@ -43,5 +47,9 @@ public class Utils {
 
             return Mono.empty();
         });
+    }
+
+    public static ZonedDateTime getTime() {
+        return ZonedDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MINUTES);
     }
 }
