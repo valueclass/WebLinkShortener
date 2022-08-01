@@ -18,11 +18,17 @@ public class LinkController {
     private LinkService service;
 
     public Mono<ServerResponse> allLinks(final ServerRequest request) {
-        return ServerResponse.ok().body(service.allLinks(), LinkDto.class);
+        return Utils.userId(request)
+                .defaultIfEmpty("")
+                .map(userId -> service.allLinks(userId))
+                .flatMap(flux -> ServerResponse.ok().body(flux, LinkDto.class));
     }
 
     public Mono<ServerResponse> findLink(final ServerRequest request) {
-        return ServerResponse.accepted().build();
+        return Utils.userId(request)
+                .defaultIfEmpty("")
+                .flatMap(userId -> service.findLink(userId, request.pathVariable("id")))
+                .flatMap(link -> ServerResponse.ok().bodyValue(link));
     }
 
     public Mono<ServerResponse> createLink(final ServerRequest request) {

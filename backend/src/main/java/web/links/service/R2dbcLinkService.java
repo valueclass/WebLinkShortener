@@ -28,8 +28,10 @@ public class R2dbcLinkService implements LinkService {
     private final UrlValidator validator = new UrlValidator(new String[]{"http", "https"});
 
     @Override
-    public Flux<LinkDto> allLinks() {
-        return links.findAll().map(LinkDto::fromModel);
+    public Flux<LinkDto> allLinks(final String userId) {
+        return links.findAll()
+                .filter(model -> checkAccess(model, userId))
+                .map(LinkDto::fromModel);
     }
 
     @Override
@@ -62,6 +64,14 @@ public class R2dbcLinkService implements LinkService {
     public Mono<Void> deleteLink(final String userId, final String linkId) {
         return findLinkAndCheckAccess(linkId, userId, "Cannot delete this link")
                 .flatMap(model -> links.delete(model));
+    }
+
+    @Override
+    public Mono<LinkDto> findLink(final String userId, final String linkId) {
+        return links.findByLinkId(linkId)
+                .filter(model -> checkAccess(model, userId))
+                .switchIfEmpty(Mono.error(() -> new LinkNotFoundException("Link not found")))
+                .map(LinkDto::fromModel);
     }
 
     private void requireValidDestinationUrl(final String destination) {
@@ -105,5 +115,9 @@ public class R2dbcLinkService implements LinkService {
         requireValidDestinationUrl(destination);
 
         return builder.destination(destination);
+    }
+
+    private boolean checkAccess(final LinkModel model, final String userId) {
+        return !model.disabled() && (!model.private_() || model.ownerId().equals(userId));
     }
 }
