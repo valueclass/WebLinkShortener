@@ -5,8 +5,8 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import web.links.utils.Utils;
 
-import java.time.Clock;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 @Table("links")
 public record LinkModel(
@@ -42,6 +42,10 @@ public record LinkModel(
         return new Builder(this);
     }
 
+    public static Builder builder(final String ownerId) {
+        return new Builder(ownerId);
+    }
+
     public static class Builder {
         private final Integer id;
         private final String linkId;
@@ -67,6 +71,19 @@ public record LinkModel(
             this.parent = model;
         }
 
+        private Builder(final String ownerId) {
+            this.id = null;
+            this.linkId = Utils.generateAlphanumericId(8);
+            this.ownerId = ownerId;
+            this.private_ = false;
+            this.disabled = false;
+            this.destination = null;
+            this.source = null;
+            this.created = null;
+            this.modified = null;
+            this.parent = null;
+        }
+
         public Builder private_(final boolean private_) {
             this.private_ = private_;
             return this;
@@ -88,6 +105,9 @@ public record LinkModel(
         }
 
         public LinkModel build() {
+            Objects.requireNonNull(destination, "Cannot build LinkModel, this.destination is null");
+            if (source == null) source = linkId;
+
             if (isModified())
                 return new LinkModel(id, linkId, ownerId, private_, disabled, destination, source, created(), modified);
 
@@ -95,7 +115,7 @@ public record LinkModel(
         }
 
         private boolean isModified() {
-            return !private_.equals(parent.private_) || !disabled.equals(parent.disabled) || !destination.equals(parent.destination) || !source.equals(parent.source);
+            return parent == null || !private_.equals(parent.private_) || !disabled.equals(parent.disabled) || !destination.equals(parent.destination) || !source.equals(parent.source);
         }
 
         private ZonedDateTime created() {

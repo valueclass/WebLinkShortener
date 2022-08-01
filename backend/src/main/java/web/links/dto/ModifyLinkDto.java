@@ -4,18 +4,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ModifyLinkDto {
     @JsonProperty("private")
-    private boolean private_;
+    private Boolean private_;
     private String source;
     private String destination;
 
     public ModifyLinkDto() {
     }
 
-    public boolean isPrivate() {
+    public Boolean getPrivate() {
         return private_;
     }
 
-    public void setPrivate(final boolean private_) {
+    public void setPrivate(final Boolean private_) {
         this.private_ = private_;
     }
 

@@ -2,7 +2,6 @@ package web.links.service;
 
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -13,18 +12,20 @@ import web.links.exception.LinkAccessDeniedException;
 import web.links.exception.LinkNotFoundException;
 import web.links.model.LinkModel;
 import web.links.repository.LinkRepository;
-import web.links.utils.Utils;
 
-import java.time.Clock;
-import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+// FIXME: Source can be null
 
 @Service
 public class R2dbcLinkService implements LinkService {
     @Autowired
     private LinkRepository links;
 
-    private final UrlValidator validator = new UrlValidator(new String[]{ "http", "https" });
+    private final UrlValidator validator = new UrlValidator(new String[]{"http", "https"});
 
     @Override
     public Flux<LinkDto> allLinks() {
@@ -33,68 +34,70 @@ public class R2dbcLinkService implements LinkService {
 
     @Override
     public Mono<LinkDto> createLink(final String userId, final ModifyLinkDto metadata) {
-        final String id = Utils.generateAlphanumericId(8);
-        final String source = Optional.ofNullable(metadata.getSource())
-                .filter(s -> !(s.isEmpty() || s.isBlank()))
-                .orElse(id);
-        validateSource(source);
-
         final String destination = metadata.getDestination();
-        validateDestination(destination);
+        final String source = metadata.getSource();
+        final boolean private_ = metadata.getPrivate() != null && metadata.getPrivate();
 
-        final ZonedDateTime now = ZonedDateTime.now(Clock.systemUTC());
-        final LinkModel link = new LinkModel(null, id, userId, metadata.isPrivate(), false, destination, source, now, now);
+        requireField(destination, "destination");
+        requireField(source, "source");
+        requireValidDestinationUrl(destination);
 
-        return links.save(link).map(LinkDto::fromModel);
+        return checkSourceAndBuild(source, LinkModel.builder(userId))
+                .map(builder -> builder.destination(destination).private_(private_).build())
+                .flatMap(model -> links.save(model))
+                .map(LinkDto::fromModel);
+    }
+
+    private Mono<LinkModel> findLinkAndCheckAccess(final String linkId, final String userId) {
+        return links.findByLinkId(linkId)
+                .switchIfEmpty(Mono.error(() -> new LinkNotFoundException("Link not found")))
+                .filter(link -> link.ownerId().equals(userId))
+                .switchIfEmpty(Mono.error(() -> new LinkAccessDeniedException("Cannot modify this link")));
     }
 
     @Override
     public Mono<LinkDto> modifyLink(final String userId, final String linkId, final ModifyLinkDto metadata) {
-        final String destination = Optional.ofNullable(metadata.getDestination())
-                .filter(s -> !(s.isEmpty() || s.isBlank()))
-                .orElse("");
-
-        if (!destination.isEmpty())
-            validateDestination(destination);
-
-        final String source = Optional.ofNullable(metadata.getSource())
-                .filter(s -> !(s.isEmpty() || s.isBlank()))
-                .orElse("");
-        validateSource(source);
-
-        return Mono.justOrEmpty(source)
-                .filter(s -> !(s.isBlank() || s.isEmpty()))
-                .flatMap(s -> links.findBySource(s))
-                .hasElement()
-                .flatMap(exists -> exists ? Mono.error(() -> new InvalidLinkException("Source exists")) : links.findByLinkId(linkId))
-                .switchIfEmpty(Mono.error(() -> new LinkNotFoundException("Link not found")))
-                .filter(link -> link.ownerId().equals(userId))
-                .switchIfEmpty(Mono.error(() -> new LinkAccessDeniedException("Cannot modify this link")))
-                .map(link -> modify(link.mutable(), metadata.isPrivate(), destination, source))
-                .flatMap(link -> links.save(link))
+        return findLinkAndCheckAccess(linkId, userId)
+                .flatMap(model -> checkSourceAndBuild(metadata.getSource(), model.mutable()))
+                .map(builder -> checkDestinationAndBuild(metadata.getDestination(), builder))
+                .map(builder -> Optional.ofNullable(metadata.getPrivate()).map(builder::private_).orElse(builder).build())
+                .flatMap(model -> links.save(model))
                 .map(LinkDto::fromModel);
     }
 
-    private LinkModel modify(final LinkModel.Builder builder, final boolean private_, final String destination, final String source) {
-        if (!destination.isEmpty())
-            builder.destination(destination);
-
-        if (!source.isEmpty())
-            builder.source(source);
-
-        return builder.private_(private_).build();
-    }
-
-    private void validateDestination(final String destination) {
-        if (destination == null || destination.isEmpty() || destination.isBlank())
-            throw new InvalidLinkException("No destination");
-
+    private void requireValidDestinationUrl(final String destination) {
         if (!validator.isValid(destination))
             throw new InvalidLinkException("Destination is not a valid URL");
     }
 
-    private void validateSource(final String source) {
+    private void requireField(final String field, final String name) {
+        if (field == null || field.isBlank())
+            throw new InvalidLinkException("No " + name);
+    }
+
+    private void requireSourceLength(final String source) {
         if (source.length() > 128)
             throw new InvalidLinkException("Source cannot be longer than 128 characters");
+    }
+
+    private Mono<LinkModel.Builder> checkSourceAndBuild(final String source, final LinkModel.Builder builder) {
+        if (source == null || source.isBlank())
+            return Mono.just(builder);
+
+        requireSourceLength(source);
+
+        return links.findBySource(source)
+                .hasElement()
+                .flatMap(b -> b ? Mono.error(new InvalidLinkException("Source is not unique")) : Mono.just(builder.source(source)))
+                .switchIfEmpty(Mono.just(builder));
+    }
+
+    private LinkModel.Builder checkDestinationAndBuild(final String destination, final LinkModel.Builder builder) {
+        if (destination == null || destination.isBlank())
+            return builder;
+
+        requireValidDestinationUrl(destination);
+
+        return builder.destination(destination);
     }
 }
