@@ -48,21 +48,20 @@ public class R2dbcLinkService implements LinkService {
                 .map(LinkDto::fromModel);
     }
 
-    private Mono<LinkModel> findLinkAndCheckAccess(final String linkId, final String userId) {
-        return links.findByLinkId(linkId)
-                .switchIfEmpty(Mono.error(() -> new LinkNotFoundException("Link not found")))
-                .filter(link -> link.ownerId().equals(userId))
-                .switchIfEmpty(Mono.error(() -> new LinkAccessDeniedException("Cannot modify this link")));
-    }
-
     @Override
     public Mono<LinkDto> modifyLink(final String userId, final String linkId, final ModifyLinkDto metadata) {
-        return findLinkAndCheckAccess(linkId, userId)
+        return findLinkAndCheckAccess(linkId, userId, "Cannot modify this link")
                 .flatMap(model -> checkSourceAndBuild(metadata.getSource(), model.mutable()))
                 .map(builder -> checkDestinationAndBuild(metadata.getDestination(), builder))
                 .map(builder -> Optional.ofNullable(metadata.getPrivate()).map(builder::private_).orElse(builder).build())
                 .flatMap(model -> links.save(model))
                 .map(LinkDto::fromModel);
+    }
+
+    @Override
+    public Mono<Void> deleteLink(final String userId, final String linkId) {
+        return findLinkAndCheckAccess(linkId, userId, "Cannot delete this link")
+                .flatMap(model -> links.delete(model));
     }
 
     private void requireValidDestinationUrl(final String destination) {
@@ -78,6 +77,13 @@ public class R2dbcLinkService implements LinkService {
     private void requireSourceLength(final String source) {
         if (source.length() > 128)
             throw new InvalidLinkException("Source cannot be longer than 128 characters");
+    }
+
+    private Mono<LinkModel> findLinkAndCheckAccess(final String linkId, final String userId, final String accessDeniedMessage) {
+        return links.findByLinkId(linkId)
+                .switchIfEmpty(Mono.error(() -> new LinkNotFoundException("Link not found")))
+                .filter(link -> link.ownerId().equals(userId))
+                .switchIfEmpty(Mono.error(() -> new LinkAccessDeniedException(accessDeniedMessage)));
     }
 
     private Mono<LinkModel.Builder> checkSourceAndBuild(final String source, final LinkModel.Builder builder) {

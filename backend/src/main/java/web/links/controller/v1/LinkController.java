@@ -33,7 +33,9 @@ public class LinkController {
     }
 
     public Mono<ServerResponse> deleteLink(final ServerRequest request) {
-        return ServerResponse.notFound().build();
+        return Utils.userId(request)
+                .flatMap(userId -> service.deleteLink(userId, request.pathVariable("id")))
+                .then(ServerResponse.noContent().build());
     }
 
     public Mono<ServerResponse> updateLink(final ServerRequest request) {
