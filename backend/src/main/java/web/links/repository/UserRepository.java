@@ -12,6 +12,6 @@ public interface UserRepository extends R2dbcRepository<UserModel, Integer> {
     @Query("SELECT * FROM users WHERE username = :username")
     Mono<UserModel> findByUsername(String username);
 
-    @Query("SELECT * FROM users WHERE userId = :userId")
+    @Query("SELECT * FROM users WHERE user_id = :userId")
     Mono<UserModel> findByUserId(String userId);
 }

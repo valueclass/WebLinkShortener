@@ -7,19 +7,17 @@ import web.links.model.UserModel;
 public class UserDto {
     private String id;
     private String username;
-    private String password;
 
-    private UserDto(String id, String username, String password) {
+    private UserDto(final String id, final String username) {
         this.id = id;
         this.username = username;
-        this.password = password;
     }
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -27,19 +25,11 @@ public class UserDto {
         return username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public static UserDto fromModel(UserModel model) {
-        return new UserDto(model.userId(), model.username(), model.password());
+    public static UserDto fromModel(final UserModel model) {
+        return new UserDto(model.userId(), model.username());
     }
 }

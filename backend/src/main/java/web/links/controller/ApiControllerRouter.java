@@ -21,6 +21,7 @@ public class ApiControllerRouter {
                 .DELETE("/links/{id}", links::deleteLink)
                 .PATCH("/links/{id}", links::updateLink)
                 .POST("/users/password", users::updatePassword)
+                .GET("/users/whoami", users::whoami)
                 .build();
 
         return RouterFunctions.nest(RequestPredicates.path("/api/v1"), apiRouter);
