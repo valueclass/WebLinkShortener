@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 import web.links.dto.LinkDto;
 import web.links.dto.ModifyLinkDto;
+import web.links.service.LinkQueryOptions;
 import web.links.service.LinkService;
 import web.links.utils.Utils;
 
@@ -18,9 +19,10 @@ public class LinkController {
     private LinkService service;
 
     public Mono<ServerResponse> allLinks(final ServerRequest request) {
+        final LinkQueryOptions options = LinkQueryOptions.fromRequest(request);
         return Utils.userId(request)
                 .defaultIfEmpty("")
-                .map(userId -> service.allLinks(userId))
+                .map(userId -> service.allLinks(userId, options))
                 .flatMap(flux -> ServerResponse.ok().body(flux, LinkDto.class));
     }
 

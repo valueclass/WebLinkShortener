@@ -2,6 +2,7 @@ package web.links.service;
 
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -14,11 +15,7 @@ import web.links.model.LinkModel;
 import web.links.repository.LinkRepository;
 
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
-// FIXME: Source can be null
 
 @Service
 public class R2dbcLinkService implements LinkService {
@@ -28,10 +25,14 @@ public class R2dbcLinkService implements LinkService {
     private final UrlValidator validator = new UrlValidator(new String[]{"http", "https"});
 
     @Override
-    public Flux<LinkDto> allLinks(final String userId) {
-        return links.findAll()
+    public Flux<LinkDto> allLinks(final String userId, final LinkQueryOptions options) {
+        return limit(links.findAll(options.makeExample()), options.getMax())
                 .filter(model -> checkAccess(model, userId))
                 .map(LinkDto::fromModel);
+    }
+
+    private Flux<LinkModel> limit(final Flux<LinkModel> flux, final long max) {
+        return max > -1 ? flux.take(max) : flux;
     }
 
     @Override
