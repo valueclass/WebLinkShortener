@@ -2,7 +2,10 @@ package web.links.service;
 
 import org.springframework.data.domain.Example;
 import org.springframework.web.reactive.function.server.ServerRequest;
+import web.links.exception.InvalidLinkQueryOptionsException;
 import web.links.model.LinkModel;
+
+import java.util.Optional;
 
 public class LinkQueryOptions {
     private final String owner;
@@ -33,10 +36,29 @@ public class LinkQueryOptions {
         final String owner = request.queryParam("owner").orElse(null);
         final String source = request.queryParam("source").orElse(null);
         final String destination = request.queryParam("destination").orElse(null);
-        final Boolean disabled = request.queryParam("disabled").map(Boolean::parseBoolean).orElse(null);
-        final Boolean private_ = request.queryParam("private").map(Boolean::parseBoolean).orElse(null);
+        final Boolean disabled = booleanParam(request, "disabled", false);
+        final Boolean private_ = booleanParam(request, "private", null);
         final long max = Long.parseLong(request.queryParam("max").orElse("-1"));
 
         return new LinkQueryOptions(owner, source, destination, disabled, private_, max);
+    }
+
+    private static Boolean booleanParam(final ServerRequest request, final String param, final Boolean other) {
+        final Optional<String> value = request.queryParam(param);
+
+        if (value.isPresent()) {
+            return parseBooleanParam(value.get(), param);
+        }
+
+        return other;
+    }
+
+    private static Boolean parseBooleanParam(final String value, final String name) {
+        return switch (value) {
+            case "true" -> true;
+            case "false" -> false;
+            case "include" -> null;
+            default -> throw new InvalidLinkQueryOptionsException("Invalid '" + name + "' parameter value '" + value + "'");
+        };
     }
 }
