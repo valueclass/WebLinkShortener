@@ -75,6 +75,24 @@ public class R2dbcLinkService implements LinkService {
                 .map(LinkDto::fromModel);
     }
 
+    @Override
+    public Mono<LinkDto> disableLink(final String userId, final String linkId) {
+        return findLinkAndCheckAccess(linkId, userId, "Cannot disable this link")
+                .filter(model -> !model.disabled())
+                .map(model -> model.mutable().disabled(true).build())
+                .flatMap(model -> links.save(model))
+                .map(LinkDto::fromModel);
+    }
+
+    @Override
+    public Mono<LinkDto> enableLink(final String userId, final String linkId) {
+        return findLinkAndCheckAccess(linkId, userId, "Cannot enable this link")
+                .filter(LinkModel::disabled)
+                .map(model -> model.mutable().disabled(false).build())
+                .flatMap(model -> links.save(model))
+                .map(LinkDto::fromModel);
+    }
+
     private void requireValidDestinationUrl(final String destination) {
         if (!validator.isValid(destination))
             throw new InvalidLinkException("Destination is not a valid URL");
@@ -119,6 +137,9 @@ public class R2dbcLinkService implements LinkService {
     }
 
     private boolean checkAccess(final LinkModel model, final String userId) {
-        return !model.disabled() && (!model.private_() || model.ownerId().equals(userId));
+        if (model.disabled() || model.private_())
+            return model.ownerId().equals(userId);
+
+        return true;
     }
 }

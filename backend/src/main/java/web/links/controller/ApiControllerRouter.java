@@ -18,6 +18,8 @@ public class ApiControllerRouter {
                 .GET("/links", links::allLinks)
                 .GET("/links/{id}", links::findLink)
                 .POST("/links", links::createLink)
+                .POST("/links/{id}/disable", links::disableLink)
+                .POST("/links/{id}/enable", links::enableLink)
                 .DELETE("/links/{id}", links::deleteLink)
                 .PATCH("/links/{id}", links::updateLink)
                 .POST("/users/password", users::updatePassword)

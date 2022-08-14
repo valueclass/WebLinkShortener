@@ -44,7 +44,7 @@ public class LinkController {
         return Utils.userId(request)
                 .zipWith(request.bodyToMono(ModifyLinkDto.class))
                 .flatMap(tuple -> service.createLink(tuple.getT1(), tuple.getT2()))
-                .flatMap(link -> ServerResponse.created(URI.create("/api/v1/links/" + link.getId())).bodyValue(link));
+                .flatMap(link -> ServerResponse.created(linkLocation(link)).bodyValue(link));
     }
 
     public Mono<ServerResponse> deleteLink(final ServerRequest request) {
@@ -57,5 +57,23 @@ public class LinkController {
         return Mono.zip(Utils.userId(request), Mono.just(request.pathVariable("id")), request.bodyToMono(ModifyLinkDto.class))
                 .flatMap(tuple -> service.modifyLink(tuple.getT1(), tuple.getT2(), tuple.getT3()))
                 .flatMap(link -> ServerResponse.ok().bodyValue(link));
+    }
+
+    public Mono<ServerResponse> disableLink(final ServerRequest request) {
+        return Utils.userId(request)
+                .flatMap(userId -> service.disableLink(userId, request.pathVariable("id")))
+                .flatMap(link -> ServerResponse.noContent().build())
+                .switchIfEmpty(Mono.defer(() -> ServerResponse.noContent().build()));
+    }
+
+    public Mono<ServerResponse> enableLink(final ServerRequest request) {
+        return Utils.userId(request)
+                .flatMap(userId -> service.enableLink(userId, request.pathVariable("id")))
+                .flatMap(link -> ServerResponse.ok().bodyValue(link))
+                .switchIfEmpty(Mono.defer(() -> ServerResponse.noContent().build()));
+    }
+
+    private static URI linkLocation(final LinkDto link) {
+        return URI.create("/api/v1/links/" + link.getId());
     }
 }

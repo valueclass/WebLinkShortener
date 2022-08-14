@@ -11,4 +11,6 @@ public interface LinkService {
     Mono<LinkDto> modifyLink(String userId, String linkId, ModifyLinkDto metadata);
     Mono<Void> deleteLink(String userId, String linkId);
     Mono<LinkDto> findLink(String userId, String linkId);
+    Mono<LinkDto> disableLink(String userId, String linkId);
+    Mono<LinkDto> enableLink(String userId, String linkId);
 }
