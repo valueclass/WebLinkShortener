@@ -32,6 +32,10 @@ public class LinkQueryOptions {
         return max;
     }
 
+    public static LinkQueryOptions none() {
+        return new LinkQueryOptions(null, null, null, false, null, -1);
+    }
+
     public static LinkQueryOptions fromRequest(final ServerRequest request) {
         final String owner = request.queryParam("owner").orElse(null);
         final String source = request.queryParam("source").orElse(null);
