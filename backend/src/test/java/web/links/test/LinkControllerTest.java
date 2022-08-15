@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono;
 import web.links.controller.v1.LinkController;
 import web.links.controller.v1.LinkControllerRouter;
 import web.links.dto.LinkDto;
+import web.links.exception.LinkAccessDeniedException;
 import web.links.exception.LinkNotFoundException;
 import web.links.service.LinkQueryOptions;
 import web.links.service.LinkService;
@@ -74,5 +75,15 @@ public class LinkControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(LinkDto.class);
+    }
+
+    @Test
+    public void returnsNotFoundWhenUserCannotAccessALink() {
+        when(service.findLink(anyString(), anyString())).thenReturn(Mono.error(() -> new LinkAccessDeniedException("Cannot access this link")));
+
+        client.get()
+                .uri("/api/v1/links" + TestData.ALICE_PRIVATE_LINK_ID)
+                .exchange()
+                .expectStatus().isNotFound();
     }
 }

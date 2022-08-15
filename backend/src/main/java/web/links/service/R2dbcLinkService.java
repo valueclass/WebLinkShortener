@@ -71,7 +71,7 @@ public class R2dbcLinkService implements LinkService {
     public Mono<LinkDto> findLink(final String userId, final String linkId) {
         return links.findByLinkId(linkId)
                 .filter(model -> checkAccess(model, userId))
-                .switchIfEmpty(Mono.error(() -> new LinkNotFoundException("Link not found")))
+                .switchIfEmpty(Mono.error(() -> new LinkAccessDeniedException("Cannot access this link")))
                 .map(LinkDto::fromModel);
     }
 

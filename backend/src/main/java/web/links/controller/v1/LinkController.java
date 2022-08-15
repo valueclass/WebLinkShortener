@@ -9,6 +9,8 @@ import web.links.dto.LinkDto;
 import web.links.dto.ModifyLinkDto;
 import web.links.exception.BadRequestException;
 import web.links.exception.InvalidLinkQueryOptionsException;
+import web.links.exception.LinkAccessDeniedException;
+import web.links.exception.LinkNotFoundException;
 import web.links.service.LinkQueryOptions;
 import web.links.service.LinkService;
 import web.links.utils.Utils;
@@ -37,6 +39,7 @@ public class LinkController {
         return Utils.userId(request)
                 .defaultIfEmpty("")
                 .flatMap(userId -> service.findLink(userId, request.pathVariable("id")))
+                .onErrorMap(LinkAccessDeniedException.class, ex -> new LinkNotFoundException("Link not found"))
                 .flatMap(link -> ServerResponse.ok().bodyValue(link));
     }
 
@@ -50,18 +53,21 @@ public class LinkController {
     public Mono<ServerResponse> deleteLink(final ServerRequest request) {
         return Utils.userId(request)
                 .flatMap(userId -> service.deleteLink(userId, request.pathVariable("id")))
+                .onErrorMap(LinkAccessDeniedException.class, ex -> new LinkNotFoundException("Link not found"))
                 .then(ServerResponse.noContent().build());
     }
 
     public Mono<ServerResponse> updateLink(final ServerRequest request) {
         return Mono.zip(Utils.userId(request), Mono.just(request.pathVariable("id")), request.bodyToMono(ModifyLinkDto.class))
                 .flatMap(tuple -> service.modifyLink(tuple.getT1(), tuple.getT2(), tuple.getT3()))
+                .onErrorMap(LinkAccessDeniedException.class, ex -> new LinkNotFoundException("Link not found"))
                 .flatMap(link -> ServerResponse.ok().bodyValue(link));
     }
 
     public Mono<ServerResponse> disableLink(final ServerRequest request) {
         return Utils.userId(request)
                 .flatMap(userId -> service.disableLink(userId, request.pathVariable("id")))
+                .onErrorMap(LinkAccessDeniedException.class, ex -> new LinkNotFoundException("Link not found"))
                 .flatMap(link -> ServerResponse.noContent().build())
                 .switchIfEmpty(Mono.defer(() -> ServerResponse.noContent().build()));
     }
@@ -69,6 +75,7 @@ public class LinkController {
     public Mono<ServerResponse> enableLink(final ServerRequest request) {
         return Utils.userId(request)
                 .flatMap(userId -> service.enableLink(userId, request.pathVariable("id")))
+                .onErrorMap(LinkAccessDeniedException.class, ex -> new LinkNotFoundException("Link not found"))
                 .flatMap(link -> ServerResponse.ok().bodyValue(link))
                 .switchIfEmpty(Mono.defer(() -> ServerResponse.noContent().build()));
     }
