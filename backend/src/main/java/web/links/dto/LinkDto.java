@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import web.links.model.LinkModel;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LinkDto {
@@ -94,6 +95,19 @@ public class LinkDto {
 
     public void setModified(final ZonedDateTime modified) {
         this.modified = modified;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final LinkDto other = (LinkDto) o;
+        return private_ == other.private_ && disabled == other.disabled && Objects.equals(id, other.id) && Objects.equals(ownerId, other.ownerId) && Objects.equals(destination, other.destination) && Objects.equals(source, other.source) && Objects.equals(created, other.created) && Objects.equals(modified, other.modified);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, ownerId, private_, disabled, destination, source, created, modified);
     }
 
     public static LinkDto fromModel(LinkModel model) {
