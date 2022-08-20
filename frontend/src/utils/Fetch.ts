@@ -7,6 +7,10 @@ export class FetchException extends Exception {
     get type(): string {
         return FetchException.name;
     }
+
+    getDisplayMessage(): string {
+        return "Network error";
+    }
 }
 
 export function Fetch(request: Request | RequestInfo, init?: RequestInit): Observable<Response> {

@@ -28,6 +28,10 @@ export class Exception {
     get type(): string {
         return Exception.name;
     }
+
+    getDisplayMessage() {
+        return "Exception";
+    }
 }
 
 export class ErrorException<E extends Error> extends Exception {
@@ -44,5 +48,9 @@ export class ErrorException<E extends Error> extends Exception {
 
     get error() {
         return this._error;
+    }
+
+    getDisplayMessage(): string {
+        return "Internal Exception";
     }
 }

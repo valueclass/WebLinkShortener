@@ -13,8 +13,6 @@ export class ApiException extends Exception {
         const cause = b instanceof Exception ? b : (c || null);
         const status = isString(a) ? (b as number) : a;
 
-        console.log('ApiException ctor message', message);
-
         if (message) {
             if (cause) super(message, cause);
             else super(message);
@@ -84,6 +82,6 @@ export class ServerException extends ApiException {
     }
 
     getDisplayMessage(): string {
-        return "Internal server exception";
+        return "Internal Server Exception";
     }
 }
