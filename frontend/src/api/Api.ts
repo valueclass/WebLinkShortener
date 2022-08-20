@@ -3,6 +3,7 @@ import { Exception } from "../utils/Exceptions";
 import { Fetch } from "../utils/Fetch";
 import { responseToJson } from "../utils/Json";
 import { isString } from "../utils/Types";
+import { then } from "../utils/Operators";
 
 export class ApiException extends Exception {
     protected _status: number;
@@ -134,7 +135,7 @@ export function UserLogin(username: string, password: string): Observable<User> 
 }
 
 export function UserLogout(): Observable<any> {
-    return ApiPost('/users/logout');
+    return ApiPost('/users/logout').pipe(then());
 }
 
 export function WhoAmI(): Observable<User> {
