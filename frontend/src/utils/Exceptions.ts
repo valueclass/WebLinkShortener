@@ -1,4 +1,4 @@
-import { Nullable } from "./Types";
+import { isString, Nullable } from "./Types";
 
 export class Exception {
     protected _message: string;
@@ -11,7 +11,7 @@ export class Exception {
     public constructor();
 
     public constructor(first?: string | Exception, second?: Nullable<Exception>) {
-        this._message = first && first instanceof String ? (first as string) : '';
+        this._message = first && isString(first) ? (first as string) : '';
         this._cause = second || null;
 
         this._type = this.type;
