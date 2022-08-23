@@ -64,6 +64,17 @@ function ApiPost(url: string, init: RequestInit = {}): Observable<Response> {
     });
 }
 
+function ApiPostJson(url: string, payload: object, init: RequestInit = {}): Observable<Response> {
+    return ApiPost(url, {
+        ...init,
+        body: JSON.stringify(payload),
+        headers: {
+            ...init.headers,
+            'Content-Type': 'application/json'
+        }
+    });
+}
+
 function ApiGet(url: string, init: RequestInit = {}): Observable<Response> {
     return ApiFetch(url, {
         method: 'GET',
@@ -77,12 +88,7 @@ export function UserLogin(username: string, password: string): Observable<User> 
         password: password
     }
 
-    return ApiPost('/users/login', {
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-    }).pipe(responseToJson());
+    return ApiPostJson('/users/login', payload).pipe(responseToJson());
 }
 
 export function UserLogout(): Observable<any> {
@@ -91,4 +97,13 @@ export function UserLogout(): Observable<any> {
 
 export function WhoAmI(): Observable<User> {
     return ApiGet('/users/whoami').pipe(responseToJson());
+}
+
+export function UpdatePassword(old: string, updated: string): Observable<void> {
+    const payload = {
+        old: old,
+        updated: updated
+    }
+
+    return ApiPostJson('/users/password', payload).pipe(then());
 }
