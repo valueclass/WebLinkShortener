@@ -6,6 +6,7 @@ import { UserLogin } from "../api/Api";
 import { Exception } from "../utils/Exceptions";
 import { useAppState } from "./AppState";
 import { ExceptionCard } from "./ExceptionCard";
+import { LoadingOverlay } from "./LoadingOverlay";
 
 export function Login() {
     const state = useAppState();
@@ -47,21 +48,23 @@ export function Login() {
         setSubscription(sub);
     }
 
+    const loading = () => !!subscription;
+
     return (
-        <div className="">
-            <Card className="max-w-lg mx-auto">
-                <H2>Log in</H2>
-                <ExceptionCard message="Failed to Log In:" exception={exception} onClose={() => setException(undefined)} />
+        <Card className="max-w-lg mx-auto">
+            <H2>Log in</H2>
+            <ExceptionCard message="Failed to Log In:" exception={exception} onClose={() => setException(undefined)} />
+            <LoadingOverlay show={loading()}>
                 <form onSubmit={handler}>
-                    <FormGroup label="Username" labelFor="username">
-                        <InputGroup id="username" type="text" placeholder="Username" onInput={e => setUsername(e.currentTarget.value)} disabled={!!subscription} />
+                    <FormGroup label="Username" labelFor="input-username">
+                        <InputGroup id="input-username" type="text" placeholder="Username" onInput={e => setUsername(e.currentTarget.value)} disabled={loading()} />
                     </FormGroup>
-                    <FormGroup label="Password" labelFor="password">
-                        <InputGroup id="password" type="password" placeholder="Password" onInput={e => setPassword(e.currentTarget.value)} disabled={!!subscription} />
+                    <FormGroup label="Password" labelFor="input-password">
+                        <InputGroup id="input-password" type="password" placeholder="Password" onInput={e => setPassword(e.currentTarget.value)} disabled={loading()} />
                     </FormGroup>
                     <Button type="submit" text="Log in" />
                 </form>
-            </Card>
-        </div>
+            </LoadingOverlay>
+        </Card>
     )
 }
