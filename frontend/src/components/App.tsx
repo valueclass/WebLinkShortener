@@ -6,6 +6,7 @@ import { Dashboard } from "./Dashboard";
 import { Login } from "./Login";
 import { Logout } from "./Logout";
 import { Nav } from "./Nav";
+import { Shorten } from "./Shorten";
 
 export default function App() {
     return (
@@ -19,6 +20,7 @@ export default function App() {
                             <Route path="/login" element={<Login />} />
                             <Route path="/logout" element={<Logout />} />
                             <Route path="/account" element={<Account />} />
+                            <Route path="/shorten" element={<Shorten />} />
                         </Routes>
                     </div>
                 </div>

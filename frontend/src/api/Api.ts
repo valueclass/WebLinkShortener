@@ -126,5 +126,15 @@ export function UpdatePassword(old: string, updated: string): Observable<void> {
 }
 
 export function FetchLinks(private_: BoolQueryParam, disabled: BoolQueryParam, userId: string): Observable<Link[]> {
-    return ApiGet(`/links?private=${private_}&disabled=${disabled}&owner=${userId}`).pipe(responseToJson<Link[]>());
+    return ApiGet(`/links?private=${private_}&disabled=${disabled}&owner=${userId}`).pipe(responseToJson());
+}
+
+export function ShortenLink(destination: string, name: string, private_: boolean): Observable<Link> {
+    const payload = {
+        destination: destination,
+        source: name,
+        private: private_
+    }
+
+    return ApiPostJson('/links', payload).pipe(responseToJson());
 }
