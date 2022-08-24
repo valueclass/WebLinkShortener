@@ -25,6 +25,23 @@ export interface User {
     username: string
 }
 
+export interface Link {
+    id: string;
+    destination: string;
+    source: string;
+    ownerId: string;
+    created: string;
+    modified: string;
+    disabled: boolean;
+    private: boolean;
+}
+
+export enum BoolQueryParam {
+    TURE = "true",
+    FALSE = "false",
+    INCLUDE = "include"
+}
+
 function ApiFetch(request: Request | RequestInfo, init?: RequestInit): Observable<Response> {
     const req = request instanceof Request ? request : new Request(`/api/v1/${request[0] === '/' ? request.substring(1) : request}`, init);
 
@@ -106,4 +123,8 @@ export function UpdatePassword(old: string, updated: string): Observable<void> {
     }
 
     return ApiPostJson('/users/password', payload).pipe(then());
+}
+
+export function FetchLinks(private_: BoolQueryParam, disabled: BoolQueryParam, userId: string): Observable<Link[]> {
+    return ApiGet(`/links?private=${private_}&disabled=${disabled}&owner=${userId}`).pipe(responseToJson<Link[]>());
 }
