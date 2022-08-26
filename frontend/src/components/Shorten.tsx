@@ -84,7 +84,7 @@ export function Shorten() {
             .subscribe({
                 next(value) {
                     setSubscription(undefined);
-                    navigate(`/edit/${value.id}`);
+                    navigate(`/manage/${value.id}`);
                 },
                 error(err) {
                     setException(err);

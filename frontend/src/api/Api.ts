@@ -102,6 +102,32 @@ function ApiGet(url: string, init: RequestInit = {}): Observable<Response> {
     });
 }
 
+function ApiPatch(url: string, init: RequestInit = {}): Observable<Response> {
+    return ApiFetch(url, {
+        method: 'PATCH',
+        ...init
+    });
+}
+
+
+function ApiPatchJson(url: string, payload: object, init: RequestInit = {}): Observable<Response> {
+    return ApiPatch(url, {
+        ...init,
+        body: JSON.stringify(payload),
+        headers: {
+            ...init.headers,
+            'Content-Type': 'application/json'
+        }
+    });
+}
+
+function ApiDelete(url: string, init: RequestInit = {}): Observable<Response> {
+    return ApiFetch(url, {
+        ...init,
+        method: 'DELETE'
+    });
+}
+
 export function UserLogin(username: string, password: string): Observable<User> {
     const payload = {
         username: username,
@@ -140,4 +166,30 @@ export function ShortenLink(destination: string, name: string, private_: boolean
     }
 
     return ApiPostJson('/links', payload).pipe(responseToJson());
+}
+
+export function FetchLink(id: string): Observable<Link> {
+    return ApiGet(`/links/${id}`).pipe(responseToJson());
+}
+
+export function DisableLink(id: string): Observable<void> {
+    return ApiPost(`/links/${id}/disable`).pipe(then());
+}
+
+export function EnableLink(id: string): Observable<void> {
+    return ApiPost(`/links/${id}/enable`).pipe(then());
+}
+
+export function EditLink(id: string, destination: Nullable<string>, name: Nullable<string>, private_: Nullable<boolean>): Observable<Link> {
+    const payload = {
+        destination: destination,
+        source: name,
+        private: private_
+    }
+
+    return ApiPatchJson(`/links/${id}`, payload).pipe(responseToJson());
+}
+
+export function RemoveLink(id: string): Observable<void> {
+    return ApiDelete(`/links/${id}`).pipe(then());
 }

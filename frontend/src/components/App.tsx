@@ -3,6 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import { Account } from "./Account";
 import { AppStateProvider } from "./AppState";
 import { Dashboard } from "./Dashboard";
+import { ManageLink } from "./ManageLink";
 import { Login } from "./Login";
 import { Logout } from "./Logout";
 import { Nav } from "./Nav";
@@ -21,6 +22,7 @@ export default function App() {
                             <Route path="/logout" element={<Logout />} />
                             <Route path="/account" element={<Account />} />
                             <Route path="/shorten" element={<Shorten />} />
+                            <Route path="/manage/:id" element={<ManageLink />} />
                         </Routes>
                     </div>
                 </div>

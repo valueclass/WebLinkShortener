@@ -44,7 +44,7 @@ function LinkInfo({ link }: LinkInfoProps) {
             </div>
 
             <div className="col-span-8 mt-2">
-                <Button icon="edit" text="Edit" className="w-full sm:w-auto" />
+                <LinkButton icon="edit" text="Edit" className="w-full sm:w-auto" to={`/manage/${link.id}`} />
             </div>
         </div>
     );
