@@ -1,59 +1,99 @@
+import { Alert } from "@blueprintjs/core";
 import { createContext, useEffect, useState, ReactNode, useContext } from "react";
 import { useNavigate } from "react-router";
-import { UnauthorizedException, User, WhoAmI } from "../api/Api";
-import { FetchException } from "../utils/Fetch";
+import { Subscription } from "rxjs";
+import { User, WhoAmI } from "../api/Api";
+import { UnauthorizedException } from "../api/ApiExceptions";
+import { Exception } from "../utils/Exceptions";
+import { Nullable, Runnable } from "../utils/Types";
 
 export interface AppState {
-    user?: User,
+    user?: Nullable<User>,
     onLogin(user: User): void;
     onLogout(): void;
 }
 
 const AppStateContext = createContext<AppState>({
-    onLogin(_) {},
-    onLogout() {}
+    user: null,
+    onLogin(_) { },
+    onLogout() { }
 });
+
+interface ExceptionAlertProps {
+    children?: ReactNode;
+    exception?: Exception;
+    onClose: Runnable;
+}
+
+export function ExceptionAlert({ children, exception, onClose }: ExceptionAlertProps) {
+    if (exception) {
+        return (
+            <>
+                <Alert isOpen={true} onClose={() => onClose()} confirmButtonText="Retry">
+                    <span>Failed to load: {exception.getDisplayMessage()}</span>
+                </Alert>
+                {children}
+            </>
+        );
+    } else {
+        return (<>{children}</>);
+    }
+}
 
 interface ProviderProps {
     children?: ReactNode
 }
 
-export function AppStateProvider({ children } : ProviderProps) {
+export function AppStateProvider({ children }: ProviderProps) {
     const [appState, setAppState] = useState<AppState>({
+        user: null,
         onLogin(u: User) {
-            console.info("logged in", u);
             setAppState(prev => ({ ...prev, user: u }));
         },
         onLogout() {
-            console.info("logged out", appState.user);
-            setAppState(prev => ({ ...prev, user: undefined }));
+            setAppState(prev => ({ ...prev, user: null }));
         }
     });
 
-    useEffect(() => {
-        const sub = WhoAmI()
+    const [exception, setException] = useState<Exception>();
+    const [subscription, setSubscription] = useState<Subscription>();
+
+    const fetchUser = () => {
+        return WhoAmI()
             .subscribe({
                 next: user => {
                     setAppState(prev => ({ user: user, ...prev }));
                 },
-                error: err => {
-                    if (err instanceof UnauthorizedException) {
-                        console.log('Unauthorized');
+                error(ex) {
+                    if (ex instanceof UnauthorizedException) {
+                        setAppState(prev => ({ user: null, ...prev }),);
                     } else {
-                        if (err instanceof FetchException) {
-                            console.log('fetch error', err);
-                        } else {
-                            console.log('error', err);
-                        }
+                        setException(ex);
                     }
+                    setSubscription(undefined);
                 },
                 complete: () => {
+                    setSubscription(undefined);
                 }
             });
-        return () => sub.unsubscribe();
-    }, [])
+    }
 
-    return (<AppStateContext.Provider value={ appState } children={ children } />);
+    const reload = () => {
+        setException(undefined);
+        setSubscription(fetchUser());
+    }
+
+    useEffect(() => {
+        const sub = fetchUser();
+        return () => sub.unsubscribe();
+    }, []);
+
+    useEffect(() => () => {
+        if (subscription)
+            subscription.unsubscribe();
+    }, [subscription])
+
+    return (<AppStateContext.Provider value={appState} children={<ExceptionAlert children={children} exception={exception} onClose={reload} />} />);
 }
 
 export function useAppState(): AppState {
@@ -67,7 +107,7 @@ export function useLoginGuard(): AppState {
     useEffect(() => {
         if (!state.user)
             navigate('/login');
-    });
+    }, [state]);
 
     return state;
 }
