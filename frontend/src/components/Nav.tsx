@@ -12,6 +12,7 @@ function Buttons({ auth, pathname }: ButtonsProps) {
     if (auth) {
         return (
             <>
+                <LinkButton className="bp4-minimal" to="/shorten" disabled={pathname === '/shorten'} icon={<Icon icon="cut" style={{ margin: '0' }} />} text={<span className="hidden sm:block sm:ml-[7px]">Shorten</span>} />
                 <LinkButton className="bp4-minimal" to="/account" disabled={pathname === '/account'} icon={<Icon icon="person" style={{ margin: '0' }} />} text={<span className="hidden sm:block sm:ml-[7px]">Account</span>} />
                 <LinkButton className="bp4-minimal" to="/" disabled={pathname === '/'} icon={<Icon icon="home" style={{ margin: '0' }} />} text={<span className="hidden sm:block sm:ml-[7px]">Home</span>} />
                 <LinkButton className="bp4-minimal" to="/logout" disabled={pathname === '/logout'} icon={<Icon icon="log-out" style={{ margin: '0' }} />} text={<span className="hidden sm:block sm:ml-[7px]">Log out</span>} />
