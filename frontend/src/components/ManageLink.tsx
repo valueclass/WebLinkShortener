@@ -55,7 +55,7 @@ export function ManageLink() {
         event.preventDefault();
 
         if (!link) {
-            navigate('/missingno');
+            navigate('/404');
             return;
         }
 
@@ -97,7 +97,7 @@ export function ManageLink() {
                 },
                 error(ex) {
                     if (ex instanceof NotFoundException) {
-                        navigate('/missingno');
+                        navigate('/404');
                     }
 
                     setException(ex);
@@ -111,7 +111,7 @@ export function ManageLink() {
 
     const disable = () => {
         if (!link) {
-            navigate('/missingno');
+            navigate('/404');
             return;
         }
 
@@ -133,7 +133,7 @@ export function ManageLink() {
 
     const enable = () => {
         if (!link) {
-            navigate('/missingno');
+            navigate('/404');
             return;
         }
 
@@ -155,7 +155,7 @@ export function ManageLink() {
 
     const remove = () => {
         if (!link) {
-            navigate('/missingno');
+            navigate('/404');
             return;
         }
 

@@ -8,6 +8,7 @@ import { Login } from "./Login";
 import { Logout } from "./Logout";
 import { Nav } from "./Nav";
 import { Shorten } from "./Shorten";
+import { NotFound } from "./NotFound";
 
 export default function App() {
     return (
@@ -23,6 +24,8 @@ export default function App() {
                             <Route path="/account" element={<Account />} />
                             <Route path="/shorten" element={<Shorten />} />
                             <Route path="/manage/:id" element={<ManageLink />} />
+                            <Route path="/404" element={<NotFound />} />
+                            <Route path="*" element={<NotFound />} />
                         </Routes>
                     </div>
                 </div>
