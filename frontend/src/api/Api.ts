@@ -2,7 +2,8 @@ import { Observable, of } from "rxjs";
 import { Fetch } from "../utils/Fetch";
 import { responseToJson } from "../utils/Json";
 import { then } from "../utils/Operators";
-import { ApiException, ServerException, UnauthorizedException } from "./ApiExceptions";
+import { Nullable } from "../utils/Types";
+import { ApiException, NotFoundException, ServerException, UnauthorizedException } from "./ApiExceptions";
 
 export function ErrorResponseToException(res: ErrorResponse): ApiException {
     switch (res.status) {
@@ -10,6 +11,8 @@ export function ErrorResponseToException(res: ErrorResponse): ApiException {
             return new UnauthorizedException(res.message);
         case ServerException.STATUS_CODE:
             return new ServerException(res.message);
+        case NotFoundException.STATUS_CODE:
+            return new NotFoundException(res.message);
         default:
             return new ApiException(res.message, res.status);
     }

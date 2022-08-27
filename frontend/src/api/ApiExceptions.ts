@@ -85,3 +85,28 @@ export class ServerException extends ApiException {
         return "Internal Server Exception";
     }
 }
+
+export class NotFoundException extends ApiException {
+    public static readonly STATUS_CODE = 404;
+
+    public constructor(message: string, cause: Exception);
+    public constructor(message: string);
+    public constructor();
+    public constructor(message?: string, cause?: Exception) {
+        if (message) {
+            if (cause) super(message, NotFoundException.STATUS_CODE, cause);
+            else super(message, NotFoundException.STATUS_CODE);
+        } else {
+            if (cause) super(NotFoundException.STATUS_CODE, cause);
+            else super(NotFoundException.STATUS_CODE);
+        }
+    }
+
+    get type(): string {
+        return NotFoundException.name;
+    }
+
+    getDisplayMessage(): string {
+        return "Not Found";
+    }
+}
