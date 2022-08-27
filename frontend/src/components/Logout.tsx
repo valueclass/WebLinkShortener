@@ -4,11 +4,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserLogout } from "../api/Api";
 import { useLoginGuard } from "./AppState";
 
-interface CardContent {
+interface CardContentProps {
     working: boolean
 }
 
-function CardContent({ working }: CardContent) {
+function CardContent({ working }: CardContentProps) {
     if (working) {
         return (
             <span>Working...</span>
