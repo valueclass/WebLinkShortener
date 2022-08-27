@@ -125,15 +125,19 @@ export function Dashboard() {
             .subscribe({
                 next(links) {
                     setLinks(links);
-                    setResults(FilterLinks(links, includePublicByDefault, includePrivateByDefault, includeDisabledByDefault, '', defaultMaxResults));
-                    setState(links.length > 0 ? State.DONE : State.NO_RESULTS);
+
+                    if (links.length > 0) {
+                        setResults(FilterLinks(links, includePublicByDefault, includePrivateByDefault, includeDisabledByDefault, '', defaultMaxResults));
+                        setState(State.DONE);
+                    } else {
+                        setState(State.NO_RESULTS);
+                    }
                 },
                 error(ex) {
                     setException(ex);
                     setState(State.ERROR);
                 },
-                complete() {
-                },
+                complete() { },
             });
 
         return () => sub.unsubscribe();
@@ -142,7 +146,9 @@ export function Dashboard() {
     const search = (event: FormEvent) => {
         event.preventDefault();
 
-        setResults(FilterLinks(links, public_, private_, disabled, query, maxResults));
+        const results = FilterLinks(links, public_, private_, disabled, query, maxResults);
+        setResults(results);
+        setState(results.length > 0 ? State.DONE : State.NO_SEARCH_RESULTS);
     }
 
     return (
