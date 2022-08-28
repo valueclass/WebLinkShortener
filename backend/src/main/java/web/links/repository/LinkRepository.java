@@ -11,6 +11,6 @@ public interface LinkRepository extends R2dbcRepository<LinkModel, Integer> {
     @Query("SELECT * FROM links WHERE link_id = :linkId")
     Mono<LinkModel> findByLinkId(String linkId);
 
-    @Query("SELECT id, source FROM links WHERE source = :source")
+    @Query("SELECT id, name FROM links WHERE name = :name")
     Mono<LinkModel> findBySource(String source);
 }

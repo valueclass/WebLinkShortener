@@ -31,7 +31,7 @@ function LinkInfo({ link }: LinkInfoProps) {
         <div className="w-full border-stone-300 border rounded-sm grid grid-cols-8 p-1 sm:p-2 mt-2">
             <span className="font-semibold col-span-2">Name</span>
             <span className="col-start-3 col-span-6">
-                {link.source}
+                {link.name}
             </span>
             <span className="font-semibold col-span-2">Destination</span>
             <span className="col-start-3 col-span-6 truncate">
@@ -97,7 +97,7 @@ function FilterLinks(links: Link[], public_: boolean, private_: boolean, disable
             return false;
 
         if (query && query !== '')
-            return link.source.includes(query) || link.destination.includes(query);
+            return link.name.includes(query) || link.destination.includes(query);
 
         return true;
     });

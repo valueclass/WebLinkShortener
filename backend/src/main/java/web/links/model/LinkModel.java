@@ -16,21 +16,21 @@ public record LinkModel(
     @Column("private") Boolean private_,
     Boolean disabled,
     String destination,
-    String source,
+    String name,
     ZonedDateTime created,
     ZonedDateTime modified
 ) {
 
     public LinkModel private_(final boolean private_) {
-        return new LinkModel(id, linkId, ownerId, private_, disabled, destination, source, created, ZonedDateTime.now());
+        return new LinkModel(id, linkId, ownerId, private_, disabled, destination, name, created, ZonedDateTime.now());
     }
 
     public LinkModel disabled(final boolean disabled) {
-        return new LinkModel(id, linkId, ownerId, private_, disabled, destination, source, created, ZonedDateTime.now());
+        return new LinkModel(id, linkId, ownerId, private_, disabled, destination, name, created, ZonedDateTime.now());
     }
 
     public LinkModel destination(final String destination) {
-        return new LinkModel(id, linkId, ownerId, private_, disabled, destination, source, created, ZonedDateTime.now());
+        return new LinkModel(id, linkId, ownerId, private_, disabled, destination, name, created, ZonedDateTime.now());
     }
 
     public LinkModel source(final String source) {
@@ -53,7 +53,7 @@ public record LinkModel(
         private Boolean private_;
         private Boolean disabled;
         private String destination;
-        private String source;
+        private String name;
         private final ZonedDateTime created;
         private ZonedDateTime modified;
         private final LinkModel parent;
@@ -65,7 +65,7 @@ public record LinkModel(
             this.private_ = model.private_;
             this.disabled = model.disabled;
             this.destination = model.destination;
-            this.source = model.source;
+            this.name = model.name;
             this.created = model.created;
             this.modified = model.modified;
             this.parent = model;
@@ -78,7 +78,7 @@ public record LinkModel(
             this.private_ = false;
             this.disabled = false;
             this.destination = null;
-            this.source = null;
+            this.name = null;
             this.created = null;
             this.modified = null;
             this.parent = null;
@@ -99,23 +99,23 @@ public record LinkModel(
             return this;
         }
 
-        public Builder source(final String source) {
-            this.source = source;
+        public Builder name(final String name) {
+            this.name = name;
             return this;
         }
 
         public LinkModel build() {
             Objects.requireNonNull(destination, "Cannot build LinkModel, this.destination is null");
-            if (source == null) source = linkId;
+            if (name == null) name = linkId;
 
             if (isModified())
-                return new LinkModel(id, linkId, ownerId, private_, disabled, destination, source, created(), modified);
+                return new LinkModel(id, linkId, ownerId, private_, disabled, destination, name, created(), modified);
 
             return parent;
         }
 
         private boolean isModified() {
-            return parent == null || !private_.equals(parent.private_) || !disabled.equals(parent.disabled) || !destination.equals(parent.destination) || !source.equals(parent.source);
+            return parent == null || !private_.equals(parent.private_) || !disabled.equals(parent.disabled) || !destination.equals(parent.destination) || !name.equals(parent.name);
         }
 
         private ZonedDateTime created() {

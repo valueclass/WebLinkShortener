@@ -44,9 +44,9 @@ public class R2dbcLinkService implements LinkService {
         final boolean private_ = metadata.getPrivate() != null && metadata.getPrivate();
 
         requireField(destination, "destination");
-        requireField(source, "source");
+        requireField(source, "name");
         requireValidDestinationUrl(destination);
-        requireValidSource(source);
+        requireValidName(source);
 
         return checkSourceAndBuild(source, LinkModel.builder(userId))
                 .map(builder -> builder.destination(destination).private_(private_).build())
@@ -101,14 +101,14 @@ public class R2dbcLinkService implements LinkService {
             throw new InvalidLinkException("Destination is not a valid URL");
     }
 
-    private void requireValidSource(final String name) {
+    private void requireValidName(final String name) {
         final int len = name.length();
         if (len > 0) {
             if (len > 128)
-                throw new InvalidLinkException("Source cannot be longer than 128 characters");
+                throw new InvalidLinkException("Name cannot be longer than 128 characters");
 
             if (!nameValidator.test(name))
-                throw new InvalidLinkException("Source is invalid");
+                throw new InvalidLinkException("Name is invalid");
         }
     }
 
@@ -128,11 +128,11 @@ public class R2dbcLinkService implements LinkService {
         if (source == null || source.isBlank())
             return Mono.just(builder);
 
-        requireValidSource(source);
+        requireValidName(source);
 
         return links.findBySource(source)
                 .hasElement()
-                .flatMap(b -> b ? Mono.error(new InvalidLinkException("Source is not unique")) : Mono.just(builder.source(source)))
+                .flatMap(b -> b ? Mono.error(new InvalidLinkException("Source is not unique")) : Mono.just(builder.name(source)))
                 .switchIfEmpty(Mono.just(builder));
     }
 

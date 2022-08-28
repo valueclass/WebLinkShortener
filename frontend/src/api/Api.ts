@@ -31,7 +31,7 @@ export interface User {
 export interface Link {
     id: string;
     destination: string;
-    source: string;
+    name: string;
     ownerId: string;
     created: string;
     modified: string;

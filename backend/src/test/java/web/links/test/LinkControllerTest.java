@@ -47,7 +47,7 @@ public class LinkControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                     .jsonPath("$.id", TestData.ALICE_PUBLIC_LINK_ID).exists()
-                    .jsonPath("$.source", TestData.ALICE_PUBLIC_LINK.source());
+                    .jsonPath("$.name", TestData.ALICE_PUBLIC_LINK.name());
     }
 
     @Test

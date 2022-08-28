@@ -38,7 +38,7 @@ public class LinkQueryOptions {
 
     public static LinkQueryOptions fromRequest(final ServerRequest request) {
         final String owner = request.queryParam("owner").orElse(null);
-        final String source = request.queryParam("source").orElse(null);
+        final String source = request.queryParam("name").orElse(null);
         final String destination = request.queryParam("destination").orElse(null);
         final Boolean disabled = booleanParam(request, "disabled", false);
         final Boolean private_ = booleanParam(request, "private", null);

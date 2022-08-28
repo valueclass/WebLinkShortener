@@ -47,7 +47,7 @@ export function ManageLink() {
     const updateState = (link: Link) => {
         setLink(link);
         setDestination(link.destination);
-        setName(link.source);
+        setName(link.name);
         setPrivate(link.private);
     }
 
@@ -59,8 +59,8 @@ export function ManageLink() {
             return;
         }
 
-        const dst = destination !== link.destination ? destination : null;
-        const src = name !== link.source ? name : null;
+        const dst = destinationChanged ? destination : null;
+        const src = nameChanged ? name : null;
         const prv = private_ !== link.private ? private_ : null;
 
         const ex = new LinkValidator(src, dst).validate();
@@ -180,14 +180,14 @@ export function ManageLink() {
         if (!('clipboard' in navigator))
             return;
 
-        navigator.clipboard.writeText(`${process.env.REACT_APP_BASE_URL}/link/${link?.source}`)
+        navigator.clipboard.writeText(`${process.env.REACT_APP_BASE_URL}/link/${link?.name}`)
             .then(
                 _ => ManageLinkToaster.show({ message: 'Copied link to clipboard', intent: Intent.PRIMARY }),
                 _ => ManageLinkToaster.show({ message: 'Failed to copy', intent: Intent.DANGER })
             );
     }
 
-    const dirty = () => (private_ !== link?.private || destination !== link.destination || name !== link.source);
+    const dirty = () => (private_ !== link?.private || destination !== link.destination || name !== link.name);
     const working = () => (!!subscription);
 
     return (

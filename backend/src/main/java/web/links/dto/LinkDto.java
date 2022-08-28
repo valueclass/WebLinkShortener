@@ -15,20 +15,20 @@ public class LinkDto {
     private boolean private_;
     private boolean disabled;
     private String destination;
-    private String source;
+    private String name;
     private ZonedDateTime created;
     private ZonedDateTime modified;
 
     public LinkDto() {
     }
 
-    public LinkDto(String id, String ownerId, boolean private_, boolean disabled, String destination, String source, ZonedDateTime created, ZonedDateTime modified) {
+    public LinkDto(String id, String ownerId, boolean private_, boolean disabled, String destination, String name, ZonedDateTime created, ZonedDateTime modified) {
         this.id = id;
         this.ownerId = ownerId;
         this.private_ = private_;
         this.disabled = disabled;
         this.destination = destination;
-        this.source = source;
+        this.name = name;
         this.created = created;
         this.modified = modified;
     }
@@ -73,12 +73,12 @@ public class LinkDto {
         this.destination = destination;
     }
 
-    public String getSource() {
-        return source;
+    public String getName() {
+        return name;
     }
 
-    public void setSource(final String source) {
-        this.source = source;
+    public void setName(final String name) {
+        this.name = name;
     }
 
     public ZonedDateTime getCreated() {
@@ -102,15 +102,15 @@ public class LinkDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final LinkDto other = (LinkDto) o;
-        return private_ == other.private_ && disabled == other.disabled && Objects.equals(id, other.id) && Objects.equals(ownerId, other.ownerId) && Objects.equals(destination, other.destination) && Objects.equals(source, other.source) && Objects.equals(created, other.created) && Objects.equals(modified, other.modified);
+        return private_ == other.private_ && disabled == other.disabled && Objects.equals(id, other.id) && Objects.equals(ownerId, other.ownerId) && Objects.equals(destination, other.destination) && Objects.equals(name, other.name) && Objects.equals(created, other.created) && Objects.equals(modified, other.modified);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, ownerId, private_, disabled, destination, source, created, modified);
+        return Objects.hash(id, ownerId, private_, disabled, destination, name, created, modified);
     }
 
     public static LinkDto fromModel(LinkModel model) {
-        return new LinkDto(model.linkId(), model.ownerId(), model.private_(), model.disabled(), model.destination(), model.source(), model.created(), model.modified());
+        return new LinkDto(model.linkId(), model.ownerId(), model.private_(), model.disabled(), model.destination(), model.name(), model.created(), model.modified());
     }
 }
