@@ -68,7 +68,7 @@ public class LinkController {
         return Utils.userId(request)
                 .flatMap(userId -> service.disableLink(userId, request.pathVariable("id")))
                 .onErrorMap(LinkAccessDeniedException.class, ex -> new LinkNotFoundException("Link not found"))
-                .flatMap(link -> ServerResponse.noContent().build())
+                .flatMap(link -> ServerResponse.ok().bodyValue(link))
                 .switchIfEmpty(Mono.defer(() -> ServerResponse.noContent().build()));
     }
 

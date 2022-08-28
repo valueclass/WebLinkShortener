@@ -120,14 +120,16 @@ export function ManageLink() {
 
         const sub = DisableLink(link.id)
             .subscribe({
-                next(_) { },
+                next(link) {
+                    updateState(link);
+                },
                 error(ex) {
                     setExceptionCardMessage('Failed to disable a link: ');
                     setException(ex);
                     setSubscription(undefined);
                 },
                 complete() {
-                    setSubscription(fetchData(link.id, () => setSubscription(undefined)));
+                    setSubscription(undefined);
                 }
             });
 
@@ -142,14 +144,16 @@ export function ManageLink() {
 
         const sub = EnableLink(link.id)
             .subscribe({
-                next(_) { },
+                next(link) {
+                    updateState(link);
+                },
                 error(ex) {
                     setExceptionCardMessage('Failed to enable a link: ');
                     setException(ex);
                     setSubscription(undefined);
                 },
                 complete() {
-                    setSubscription(fetchData(link.id, () => setSubscription(undefined)));
+                    setSubscription(undefined);
                 },
             });
 

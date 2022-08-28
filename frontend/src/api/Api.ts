@@ -172,12 +172,12 @@ export function FetchLink(id: string): Observable<Link> {
     return ApiGet(`/links/${id}`).pipe(responseToJson());
 }
 
-export function DisableLink(id: string): Observable<void> {
-    return ApiPost(`/links/${id}/disable`).pipe(then());
+export function DisableLink(id: string): Observable<Link> {
+    return ApiPost(`/links/${id}/disable`).pipe(responseToJson());
 }
 
-export function EnableLink(id: string): Observable<void> {
-    return ApiPost(`/links/${id}/enable`).pipe(then());
+export function EnableLink(id: string): Observable<Link> {
+    return ApiPost(`/links/${id}/enable`).pipe(responseToJson());
 }
 
 export function EditLink(id: string, destination: Nullable<string>, name: Nullable<string>, private_: Nullable<boolean>): Observable<Link> {
