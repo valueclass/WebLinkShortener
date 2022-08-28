@@ -14,6 +14,7 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
+import org.springframework.security.web.server.authentication.ServerAuthenticationEntryPointFailureHandler;
 import org.springframework.security.web.server.authentication.logout.DelegatingServerLogoutHandler;
 import org.springframework.security.web.server.authentication.logout.HttpStatusReturningServerLogoutSuccessHandler;
 import org.springframework.security.web.server.authentication.logout.SecurityContextServerLogoutHandler;
@@ -22,9 +23,7 @@ import org.springframework.security.web.server.context.ServerSecurityContextRepo
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.web.server.WebFilter;
-import web.links.auth.ApiRequestServerAuthenticationConverter;
-import web.links.auth.ResponseProducingAuthenticationFailureHandler;
-import web.links.auth.HttpStatusReturningAuthenticationSuccessHandler;
+import web.links.auth.*;
 
 @EnableWebFluxSecurity
 @Configuration
@@ -32,7 +31,7 @@ public class SecurityConfig {
 
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @Bean
-    public SecurityWebFilterChain apiHttpSecurity(ServerHttpSecurity security) {
+    public SecurityWebFilterChain apiHttpSecurity(final ServerHttpSecurity security) {
         final ServerSecurityContextRepository repository = new WebSessionServerSecurityContextRepository();
 
         return security
@@ -47,6 +46,9 @@ public class SecurityConfig {
                     .logoutHandler(new DelegatingServerLogoutHandler(new WebSessionServerLogoutHandler(), new SecurityContextServerLogoutHandler()))
                     .logoutSuccessHandler(new HttpStatusReturningServerLogoutSuccessHandler())
                     .logoutUrl("/api/v1/users/logout")
+                    .and()
+                .exceptionHandling()
+                    .authenticationEntryPoint(new ErrorServerAuthenticationEndpoint())
                     .and()
                 .httpBasic()
                     .disable()
@@ -72,9 +74,9 @@ public class SecurityConfig {
         final ReactiveAuthenticationManager manager = new UserDetailsRepositoryReactiveAuthenticationManager(details);
         final AuthenticationWebFilter filter = new AuthenticationWebFilter(manager);
 
-        filter.setRequiresAuthenticationMatcher(new PathPatternParserServerWebExchangeMatcher("/api/v1/users/login"));
-        filter.setAuthenticationFailureHandler(new ResponseProducingAuthenticationFailureHandler());
-        filter.setAuthenticationSuccessHandler(new HttpStatusReturningAuthenticationSuccessHandler());
+        filter.setRequiresAuthenticationMatcher(new PathPatternParserServerWebExchangeMatcher("/api/v1/users/login", HttpMethod.POST));
+        filter.setAuthenticationFailureHandler(new ServerAuthenticationEntryPointFailureHandler(new ErrorServerAuthenticationEndpoint()));
+        filter.setAuthenticationSuccessHandler(new ResponseServerAuthenticationSuccessHandler());
         filter.setSecurityContextRepository(repository);
         filter.setServerAuthenticationConverter(new ApiRequestServerAuthenticationConverter());
 

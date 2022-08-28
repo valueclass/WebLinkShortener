@@ -8,7 +8,7 @@ public class UserDto {
     private String id;
     private String username;
 
-    private UserDto(final String id, final String username) {
+    public UserDto(final String id, final String username) {
         this.id = id;
         this.username = username;
     }
