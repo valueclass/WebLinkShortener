@@ -15,6 +15,7 @@
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
+        <start-class>web.links.WebLinkShortener</start-class>
     </properties>
 
     <build>
@@ -27,10 +28,10 @@
                         <phase>validate</phase>
                         <goals><goal>copy-resources</goal></goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/classes/resources/</outputDirectory>
+                            <outputDirectory>${project.build.directory}/classes/resources/static</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.basedir}/frontend/dist/fronted/</directory>
+                                    <directory>${maven.multiModuleProjectDirectory}/frontend/build/</directory>
                                 </resource>
                             </resources>
                         </configuration>

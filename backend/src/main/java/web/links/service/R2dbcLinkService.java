@@ -96,6 +96,16 @@ public class R2dbcLinkService implements LinkService {
                 .map(LinkDto::fromModel);
     }
 
+    @Override
+    public Mono<String> findDestination(final String userId, final String linkName) {
+        return links.findByName(linkName)
+                .switchIfEmpty(Mono.error(() -> new LinkNotFoundException("Link not found")))
+                .filter(link -> checkAccess(link, userId))
+                .switchIfEmpty(Mono.error(() -> new LinkAccessDeniedException("Cannot access this link")))
+                .filter(link -> !link.disabled())
+                .map(LinkModel::destination);
+    }
+
     private void requireValidDestinationUrl(final String destination) {
         if (!validator.isValid(destination))
             throw new InvalidLinkException("Destination is not a valid URL");
@@ -124,15 +134,15 @@ public class R2dbcLinkService implements LinkService {
                 .switchIfEmpty(Mono.error(() -> new LinkAccessDeniedException(accessDeniedMessage)));
     }
 
-    private Mono<LinkModel.Builder> checkSourceAndBuild(final String source, final LinkModel.Builder builder) {
-        if (source == null || source.isBlank())
+    private Mono<LinkModel.Builder> checkSourceAndBuild(final String name, final LinkModel.Builder builder) {
+        if (name == null || name.isBlank())
             return Mono.just(builder);
 
-        requireValidName(source);
+        requireValidName(name);
 
-        return links.findBySource(source)
+        return links.findByName(name)
                 .hasElement()
-                .flatMap(b -> b ? Mono.error(new InvalidLinkException("Source is not unique")) : Mono.just(builder.name(source)))
+                .flatMap(b -> b ? Mono.error(new InvalidLinkException("Name is not unique")) : Mono.just(builder.name(name)))
                 .switchIfEmpty(Mono.just(builder));
     }
 

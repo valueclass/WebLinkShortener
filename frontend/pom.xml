@@ -45,7 +45,7 @@
 
         <resources>
             <resource>
-                <directory>./dist</directory>
+                <directory>./build</directory>
                 <targetPath>static</targetPath>
             </resource>
         </resources>

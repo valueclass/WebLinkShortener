@@ -13,4 +13,5 @@ public interface LinkService {
     Mono<LinkDto> findLink(String userId, String linkId);
     Mono<LinkDto> disableLink(String userId, String linkId);
     Mono<LinkDto> enableLink(String userId, String linkId);
+    Mono<String> findDestination(String userId, String linkName);
 }
