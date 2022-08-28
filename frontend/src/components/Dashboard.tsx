@@ -2,6 +2,7 @@ import { Button, Card, Checkbox, FormGroup, InputGroup, Intent, NonIdealState, P
 import { FormEvent, useEffect, useState } from "react";
 import { BoolQueryParam, FetchLinks, Link } from "../api/Api";
 import { Exception } from "../utils/Exceptions";
+import { Runnable } from "../utils/Types";
 import { useLoginGuard } from "./AppState";
 import { LinkButton } from "./LinkButton";
 
@@ -67,17 +68,18 @@ function LinkInfo({ link }: LinkInfoProps) {
 }
 
 interface ContentProps {
-    state: State,
-    exception?: Exception,
-    links: Link[]
+    state: State;
+    exception?: Exception;
+    links: Link[];
+    reload: Runnable;
 }
 
-function Content({ state, exception, links }: ContentProps) {
+function Content({ state, exception, links, reload }: ContentProps) {
     switch (state) {
         case State.LOADING:
             return (<NonIdealState icon={<Spinner />} title="Loading" />);
         case State.ERROR:
-            return (<NonIdealState icon="cross" title="Error" action={<Button text="Try again" icon="repeat" />} description={(
+            return (<NonIdealState icon="cross" title="Error" action={<Button text="Try again" icon="repeat" onClick={_ => reload()} />} description={(
                 <div>
                     <span className="font-semibold">Error: {exception?.getDisplayMessage() || "Unknown error"}</span>
                     <br />
@@ -132,6 +134,7 @@ export function Dashboard() {
     const [query, setQuery] = useState<string>('');
     const [links, setLinks] = useState<Link[]>([]);
     const [results, setResults] = useState<Link[]>([]);
+    const [trigger, setTrigger] = useState<boolean>(false);
 
     useEffect(() => {
         if (!user)
@@ -157,7 +160,7 @@ export function Dashboard() {
             });
 
         return () => sub.unsubscribe();
-    }, [user]);
+    }, [user, trigger]);
 
     const search = (event: FormEvent) => {
         event.preventDefault();
@@ -193,7 +196,7 @@ export function Dashboard() {
                     </form>
                 </div>
             </Card >
-            <Content state={state} exception={exception} links={results} />
+            <Content state={state} exception={exception} links={results} reload={() => setTrigger(!trigger)} />
         </div >
     );
 }
