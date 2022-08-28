@@ -11,6 +11,12 @@ public class ModifyLinkDto {
     public ModifyLinkDto() {
     }
 
+    public ModifyLinkDto(final Boolean private_, final String source, final String destination) {
+        this.private_ = private_;
+        this.source = source;
+        this.destination = destination;
+    }
+
     public Boolean getPrivate() {
         return private_;
     }

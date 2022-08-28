@@ -12,12 +12,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import web.links.dto.LinkDto;
-import web.links.exception.LinkNotFoundException;
+import web.links.dto.ModifyLinkDto;
+import web.links.exception.InvalidLinkException;
+import web.links.exception.LinkAccessDeniedException;
 import web.links.repository.LinkRepository;
 import web.links.service.LinkQueryOptions;
 import web.links.service.LinkService;
 import web.links.service.R2dbcLinkService;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -71,14 +74,14 @@ public class LinkServiceTest {
     @Test
     public void returnsErrorWhenAccessingPrivateLinkWhenNotGivenOwnerId() {
         StepVerifier.create(service.findLink("", TestData.ALICE_PRIVATE_LINK_ID))
-                .expectError(LinkNotFoundException.class)
+                .expectError(LinkAccessDeniedException.class)
                 .verify();
     }
 
     @Test
     public void returnsErrorWhenAccessingDisabledLinkWhenNotGivenOwnerId() {
         StepVerifier.create(service.findLink("", TestData.ALICE_DISABLED_LINK_ID))
-                .expectError(LinkNotFoundException.class)
+                .expectError(LinkAccessDeniedException.class)
                 .verify();
     }
 
@@ -94,6 +97,20 @@ public class LinkServiceTest {
         StepVerifier.create(service.findLink(TestData.ALICE_ID, TestData.ALICE_DISABLED_LINK_ID))
                 .expectNext(LinkDto.fromModel(TestData.ALICE_DISABLED_LINK))
                 .verifyComplete();
+    }
+
+    @Test
+    public void validatesLinkBeforeCreation() {
+        assertThrows(InvalidLinkException.class, () -> service.createLink(TestData.ALICE_ID, new ModifyLinkDto(false, "", "bogus_not_url")));
+        assertThrows(InvalidLinkException.class, () -> service.createLink(TestData.ALICE_ID, new ModifyLinkDto(false, "\\bogus/", "https://example.com/")));
+        assertThrows(InvalidLinkException.class, () -> service.createLink(TestData.ALICE_ID, new ModifyLinkDto(false, "a".repeat(129), "https://example.com/")));
+    }
+
+    @Test
+    public void validatesLinkBeforeModification() {
+        StepVerifier.create(service.modifyLink(TestData.ALICE_ID, TestData.ALICE_PUBLIC_LINK_ID, new ModifyLinkDto(false, "", "bogus_not_url"))).expectError(InvalidLinkException.class);
+        StepVerifier.create(service.modifyLink(TestData.ALICE_ID, TestData.ALICE_PUBLIC_LINK_ID, new ModifyLinkDto(false, "\\bogus/", "https://example.com/"))).expectError(InvalidLinkException.class);
+        StepVerifier.create(service.modifyLink(TestData.ALICE_ID, TestData.ALICE_PUBLIC_LINK_ID, new ModifyLinkDto(false, "a".repeat(129), "https://example.com/"))).expectError(InvalidLinkException.class);
     }
 
     @Before

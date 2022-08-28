@@ -2,7 +2,6 @@ package web.links.service;
 
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -15,6 +14,8 @@ import web.links.model.LinkModel;
 import web.links.repository.LinkRepository;
 
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 
 @Service
@@ -23,6 +24,7 @@ public class R2dbcLinkService implements LinkService {
     private LinkRepository links;
 
     private final UrlValidator validator = new UrlValidator(new String[]{"http", "https"});
+    private final Predicate<String> nameValidator = Pattern.compile("^[a-zA-Z0-9_-]{1,128}$").asMatchPredicate();
 
     @Override
     public Flux<LinkDto> allLinks(final String userId, final LinkQueryOptions options) {
@@ -44,6 +46,7 @@ public class R2dbcLinkService implements LinkService {
         requireField(destination, "destination");
         requireField(source, "source");
         requireValidDestinationUrl(destination);
+        requireValidSource(source);
 
         return checkSourceAndBuild(source, LinkModel.builder(userId))
                 .map(builder -> builder.destination(destination).private_(private_).build())
@@ -98,14 +101,20 @@ public class R2dbcLinkService implements LinkService {
             throw new InvalidLinkException("Destination is not a valid URL");
     }
 
+    private void requireValidSource(final String name) {
+        final int len = name.length();
+        if (len > 0) {
+            if (len > 128)
+                throw new InvalidLinkException("Source cannot be longer than 128 characters");
+
+            if (!nameValidator.test(name))
+                throw new InvalidLinkException("Source is invalid");
+        }
+    }
+
     private void requireField(final String field, final String name) {
         if (field == null || field.isBlank())
             throw new InvalidLinkException("No " + name);
-    }
-
-    private void requireSourceLength(final String source) {
-        if (source.length() > 128)
-            throw new InvalidLinkException("Source cannot be longer than 128 characters");
     }
 
     private Mono<LinkModel> findLinkAndCheckAccess(final String linkId, final String userId, final String accessDeniedMessage) {
@@ -119,7 +128,7 @@ public class R2dbcLinkService implements LinkService {
         if (source == null || source.isBlank())
             return Mono.just(builder);
 
-        requireSourceLength(source);
+        requireValidSource(source);
 
         return links.findBySource(source)
                 .hasElement()
