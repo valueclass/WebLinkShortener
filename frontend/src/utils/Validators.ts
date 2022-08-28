@@ -57,14 +57,18 @@ export class LinkValidator {
         return null;
     }
 
-    public validate(): Nullable<LinkValidationException> {
-        const nameValidationResult = this.validateName();
-        if (nameValidationResult)
-            return nameValidationResult;
+    public validate(validateName: boolean, validateDestination: boolean): Nullable<LinkValidationException> {
+        if (validateName) {
+            const nameValidationResult = this.validateName();
+            if (nameValidationResult)
+                return nameValidationResult;
+        }
 
-        const destinationValidationResult = this.validateDestination();
-        if (destinationValidationResult)
-            return destinationValidationResult;
+        if (validateDestination) {
+            const destinationValidationResult = this.validateDestination();
+            if (destinationValidationResult)
+                return destinationValidationResult;
+        }
 
         return null;
     }

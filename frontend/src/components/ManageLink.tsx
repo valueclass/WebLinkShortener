@@ -59,11 +59,14 @@ export function ManageLink() {
             return;
         }
 
+        const destinationChanged = destination !== link.destination;
+        const nameChanged = name !== link.name;
+
         const dst = destinationChanged ? destination : null;
         const src = nameChanged ? name : null;
         const prv = private_ !== link.private ? private_ : null;
 
-        const ex = new LinkValidator(src, dst).validate();
+        const ex = new LinkValidator(src, dst).validate(nameChanged, destinationChanged);
         if (ex) {
             setException(ex);
             setExceptionCardMessage('Link is invalid, cannot update: ');

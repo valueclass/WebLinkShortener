@@ -28,7 +28,7 @@ export function Shorten() {
     const handler = (event: FormEvent) => {
         event.preventDefault();
 
-        const ex = new LinkValidator(name, destination).validate();
+        const ex = new LinkValidator(name, destination).validate(true, true);
         if (ex) {
             setException(ex);
             return;
