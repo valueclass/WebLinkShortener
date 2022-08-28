@@ -1,4 +1,4 @@
-import { Button, Card, Checkbox, FormGroup, InputGroup, Intent, NonIdealState, Spinner, Tag } from "@blueprintjs/core";
+import { Button, Card, Checkbox, FormGroup, InputGroup, Intent, NonIdealState, Position, Spinner, Tag, Toaster } from "@blueprintjs/core";
 import { FormEvent, useEffect, useState } from "react";
 import { BoolQueryParam, FetchLinks, Link } from "../api/Api";
 import { Exception } from "../utils/Exceptions";
@@ -9,6 +9,10 @@ const includePrivateByDefault = true;
 const includePublicByDefault = true;
 const includeDisabledByDefault = false;
 const defaultMaxResults = 30;
+
+const DashboardToaster = Toaster.create({
+    position: Position.TOP_RIGHT
+});
 
 enum State {
     LOADING,
@@ -27,6 +31,17 @@ interface LinkInfoProps {
 }
 
 function LinkInfo({ link }: LinkInfoProps) {
+    const copy = () => {
+        if (!('clipboard' in navigator))
+            return;
+
+        navigator.clipboard.writeText(`${process.env.REACT_APP_BASE_URL}/link/${link.name}`)
+            .then(
+                _ => DashboardToaster.show({ message: 'Copied link to clipboard', intent: Intent.PRIMARY }),
+                _ => DashboardToaster.show({ message: 'Failed to copy', intent: Intent.DANGER })
+            );
+    }
+
     return (
         <div className="w-full border-stone-300 border rounded-sm grid grid-cols-8 p-1 sm:p-2 mt-2">
             <span className="font-semibold col-span-2">Name</span>
@@ -43,8 +58,9 @@ function LinkInfo({ link }: LinkInfoProps) {
                 {link.disabled ? <Tag>Disabled</Tag> : <></>}
             </div>
 
-            <div className="col-span-8 mt-2">
+            <div className="col-span-8 mt-2 flex gap-y-1 flex-col sm:flex-row sm:gap-x-1">
                 <LinkButton icon="edit" text="Edit" className="w-full sm:w-auto" to={`/manage/${link.id}`} />
+                <Button icon="clipboard" text="Copy" className="w-full sm:w-auto" onClick={() => copy()} />
             </div>
         </div>
     );
